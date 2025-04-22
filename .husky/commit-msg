@@ -1,0 +1,1 @@
+npx commitlint --edit "$1" # 通过 $1 获取提交信息文件路径
