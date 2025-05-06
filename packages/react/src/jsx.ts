@@ -17,21 +17,19 @@ export const jsx = (type: ElementType, config: any, ...restChildren: any) => {
 	const props: Props = {};
 	let key: Key = null;
 	let ref: Ref = null;
-	if (config) {
-		for (const prop in config) {
-			const value = config[prop];
-			if (prop === 'key') {
-				if (value !== undefined) {
-					key = '' + value;
-				}
-			} else if (prop === 'ref') {
-				if (value !== undefined) {
-					ref = value;
-				}
-			} else {
-				if ({}.hasOwnProperty.call(config, prop)) {
-					props[prop] = value;
-				}
+	for (const prop in config) {
+		const value = config[prop];
+		if (prop === 'key') {
+			if (value !== undefined) {
+				key = '' + value;
+			}
+		} else if (prop === 'ref') {
+			if (value !== undefined) {
+				ref = value;
+			}
+		} else {
+			if ({}.hasOwnProperty.call(config, prop)) {
+				props[prop] = value;
 			}
 		}
 	}
