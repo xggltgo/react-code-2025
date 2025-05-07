@@ -1,4 +1,5 @@
 import { getPackageJson, getPackagePath, initBasePlugin } from './utils.js';
+import generatePackageJsonFilePlugin from 'rollup-plugin-generate-package-json';
 
 const packageJson = getPackageJson('react');
 const baseInputPath = getPackagePath('react');
@@ -8,11 +9,22 @@ export default [
 	{
 		input: baseInputPath + '/' + packageJson.module,
 		output: {
-			file: baseOutputPath + '/react.js',
-			name: 'react.js',
+			file: baseOutputPath + '/index.js',
+			name: 'index.js',
 			format: 'umd'
 		},
-		plugins: [...initBasePlugin()]
+		plugins: [
+			...initBasePlugin(),
+			generatePackageJsonFilePlugin({
+				inputFolder: baseInputPath,
+				baseContents: (pkg) => ({
+					name: pkg.name,
+					version: pkg.version,
+					description: pkg.description,
+					main: 'index.js'
+				})
+			})
+		]
 	},
 	{
 		input: baseInputPath + '/src/jsx.ts',
