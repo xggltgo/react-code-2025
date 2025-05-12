@@ -1,0 +1,1 @@
+export type Container = any; // 容器类型

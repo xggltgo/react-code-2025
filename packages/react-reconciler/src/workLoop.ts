@@ -1,11 +1,12 @@
 import { beginWork } from './beginWork';
 import { completeWork } from './complateWork';
-import { FiberNode } from './fiber';
+import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
 
-const prepareFreshStack = (rootFiber: FiberNode) => {
-	workInProgress = rootFiber;
+const prepareFreshStack = (fiberRootNode: FiberRootNode) => {
+	workInProgress = createWorkInProgress(fiberRootNode.current, {});
 };
 
 const completeUnitOfWork = (fiber: FiberNode) => {
@@ -38,7 +39,7 @@ const workLoop = () => {
 	}
 };
 
-export const renderRoot = (rootFiber: FiberNode) => {
+export const renderRoot = (rootFiber: FiberRootNode) => {
 	// 初始化
 	prepareFreshStack(rootFiber);
 
@@ -50,4 +51,22 @@ export const renderRoot = (rootFiber: FiberNode) => {
 			console.error('workLoop error', error);
 		}
 	} while (true);
+};
+
+const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
+	let node = fiber;
+	while (node.return !== null) {
+		node = node.return;
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode;
+	}
+	return null;
+};
+
+export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
+	// TODO 调度更新
+	// 找到 React 应用对应的 fiberRootNode 节点
+	const rootFiberNode = markUpdateFromFiberToRoot(fiber);
+	renderRoot(rootFiberNode);
 };
