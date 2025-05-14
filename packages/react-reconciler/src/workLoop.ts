@@ -1,5 +1,5 @@
 import { beginWork } from './beginWork';
-import { completeWork } from './complateWork';
+import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
 import { HostRoot } from './workTags';
 
@@ -39,20 +39,27 @@ const workLoop = () => {
 	}
 };
 
-export const renderRoot = (rootFiber: FiberRootNode) => {
+export const renderRoot = (fiberRootNode: FiberRootNode) => {
 	// 初始化
-	prepareFreshStack(rootFiber);
+	prepareFreshStack(fiberRootNode);
 
 	do {
 		try {
 			workLoop();
 			break;
 		} catch (error) {
-			console.error('workLoop error', error);
+			if (__DEV__) {
+				console.error('workLoop error', error);
+			}
 		}
 	} while (true);
 };
 
+/**
+ * 根据当前 fiber 节点，向上查找，直到找到 React 应用对应的 fiberRootNode 节点
+ * @param fiber
+ * @returns
+ */
 const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 	let node = fiber;
 	while (node.return !== null) {
@@ -66,7 +73,6 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 
 export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
 	// TODO 调度更新
-	// 找到 React 应用对应的 fiberRootNode 节点
-	const rootFiberNode = markUpdateFromFiberToRoot(fiber);
-	renderRoot(rootFiberNode);
+	const fiberRootNode = markUpdateFromFiberToRoot(fiber);
+	renderRoot(fiberRootNode);
 };

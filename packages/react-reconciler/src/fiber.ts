@@ -1,9 +1,9 @@
-import { Key, Props, Ref } from 'shared/ReactTypes';
-import { WorkTag } from './workTags';
+import { Key, Props, ReactElementType, Ref } from 'shared/ReactTypes';
+import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
-// 实现 FiberNode 数据结构
+// 实现 FiberNode 数据结构（一种介于 ReactElement 和 DomElement 之间的数据结构）
 export class FiberNode {
 	// 实例变量
 	tag: WorkTag; // 节点类型
@@ -21,9 +21,9 @@ export class FiberNode {
 	// 工作单元
 	pendingProps: Props; // 待处理的属性
 	memoizedProps: Props | null; // 已处理的属性
-    memoizedState: any; // 已处理的状态
+	memoizedState: any; // 已处理的状态
 	alternate: FiberNode | null; // 交替节点
-	flags: Flags; // 当前节点的副作用标识
+	flags: Flags; // 当前节点的副作用
 	updateQueue: unknown; // 更新队列
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -65,24 +65,36 @@ export class FiberRootNode {
 /**
  * 创建 hostRootFiber 对应的 wip FiberNode
  */
-export const createWorkInProgress = (current: FiberNode, pendingProps: Props): FiberNode => {
-	let wip = current.alternate;
+export const createWorkInProgress = (hostRootFiber: FiberNode, pendingProps: Props): FiberNode => {
+	let wip = hostRootFiber.alternate;
 	if (wip === null) {
 		// mount
-		wip = new FiberNode(current.tag, pendingProps, current.key);
-		wip.alternate = current;
-		current.alternate = wip;
-        wip.stateNode = current.stateNode;
+		wip = new FiberNode(hostRootFiber.tag, pendingProps, hostRootFiber.key);
+		wip.alternate = hostRootFiber;
+		hostRootFiber.alternate = wip;
+		wip.stateNode = hostRootFiber.stateNode;
 	} else {
 		// update
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
 	}
-	wip.type = current.type;
-	wip.child = current.child;
-	wip.memoizedProps = current.memoizedProps;
-	wip.memoizedState = current.memoizedState;
-	wip.updateQueue = current.updateQueue;
+	wip.type = hostRootFiber.type;
+	wip.memoizedProps = hostRootFiber.memoizedProps;
+	wip.memoizedState = hostRootFiber.memoizedState;
+	wip.updateQueue = hostRootFiber.updateQueue;
 
 	return wip;
+};
+
+export const createFiberFromElement = (element: ReactElementType): FiberNode => {
+	const { type, key, props } = element;
+	let fiberTag: WorkTag = FunctionComponent;
+	if (typeof type === 'string') {
+		fiberTag = HostComponent;
+	} else if (typeof type === 'function' && __DEV__) {
+		console.log('invailid type', element);
+	}
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
+	return fiber;
 };

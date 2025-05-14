@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import tsPlugin from 'rollup-plugin-typescript2';
+import replacePlugin from '@rollup/plugin-replace';
 
 export const getPackagePath = (packageName, isDist) => {
 	return fileURLToPath(
@@ -16,5 +17,7 @@ export const getPackageJson = (packageName) => {
 };
 
 export const initBasePlugin = (options = {}) => {
-	return [tsPlugin(options.typescript || {})];
+	return  [replacePlugin(options.replace || {
+		__DEV__: true,
+	}), tsPlugin(options.typescript || {})];
 };
