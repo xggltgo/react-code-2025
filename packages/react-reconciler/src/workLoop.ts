@@ -53,6 +53,10 @@ export const renderRoot = (fiberRootNode: FiberRootNode) => {
 			}
 		}
 	} while (true);
+
+	// 得到了一颗带有flags的新的 fiber 树
+	const finishedWork = fiberRootNode.current.alternate;
+	fiberRootNode.finishedWork = finishedWork;
 };
 
 /**

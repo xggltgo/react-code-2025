@@ -24,6 +24,7 @@ export class FiberNode {
 	memoizedState: any; // 已处理的状态
 	alternate: FiberNode | null; // 交替节点
 	flags: Flags; // 当前节点的副作用
+	subtreeFlags: Flags; // 子树的副作用
 	updateQueue: unknown; // 更新队列
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -43,10 +44,11 @@ export class FiberNode {
 		this.memoizedState = null;
 		this.alternate = null;
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
-// 实现 FiberRootNode 数据结构（React 应用的根 FiberNode）
+// 实现 FiberRootNode 数据结构（React 应用对应的 FiberNode）
 export class FiberRootNode {
 	container: Container; // React 应用挂载的宿主环境对应的节点
 	current: FiberNode; // 指向 宿主环境挂载点对应的 FiberNode （hostRootFiber）
@@ -77,6 +79,7 @@ export const createWorkInProgress = (hostRootFiber: FiberNode, pendingProps: Pro
 		// update
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 	wip.type = hostRootFiber.type;
 	wip.memoizedProps = hostRootFiber.memoizedProps;

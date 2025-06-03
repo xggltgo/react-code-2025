@@ -20,7 +20,7 @@ export const beginWork = (wip: FiberNode) => {
 	}
 };
 
-const reconcileChildren = (wip: FiberNode, childReactElement?: ReactElementType) => {
+const reconcileChildren = (wip: FiberNode, childReactElement: ReactElementType) => {
 	const current = wip.alternate;
 	if (current !== null) {
 		// 更新阶段
@@ -38,8 +38,8 @@ const updateHostRoot = (wip: FiberNode) => {
 	const { memoizedState } = processUpdateQueue(baseState, pendingUpdate);
 	wip.memoizedState = memoizedState;
 	(wip.updateQueue as UpdateQueue<ReactElementType>).shared.pending = null;
-	// 创建新的子节点
 	const childReactElement = wip.memoizedState;
+	// 创建新的子节点
 	reconcileChildren(wip, childReactElement);
 	return wip.child;
 };
