@@ -37,7 +37,7 @@ const performUnitOfWork = (fiber: FiberNode) => {
 
 const workLoop = () => {
 	while (workInProgress) {
-		workInProgress = performUnitOfWork(workInProgress);
+		performUnitOfWork(workInProgress);
 	}
 };
 

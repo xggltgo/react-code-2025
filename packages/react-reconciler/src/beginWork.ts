@@ -16,7 +16,7 @@ export const beginWork = (wip: FiberNode) => {
 			if (__DEV__) {
 				console.warn('beginWork: unhandled unit of work type', wip.tag);
 			}
-			break;
+			return null;
 	}
 };
 

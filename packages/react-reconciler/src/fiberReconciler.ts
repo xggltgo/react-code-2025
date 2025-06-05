@@ -18,11 +18,13 @@ export const createContainer = (container: Container) => {
 	return fiberRootNode;
 };
 
-// 更新流程入口
+/**
+ * 该函数会在 ReactDOM.createRoot().render() 中调用，开启调度更新流程
+ */
 export const updateContainer = (element: ReactElementType, fiberRootNode: FiberRootNode) => {
     const hostRootFiber = fiberRootNode.current;
     const update = createUpdate<ReactElementType | null>(element);
-    enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>, update); // 将更新添加到更新队列中
+    enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>, update); // 将更新添加到 hostRootFiber 的更新队列中
     scheduleUpdateOnFiber(hostRootFiber); // 调度更新
     return element;
 };

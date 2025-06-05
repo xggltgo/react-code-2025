@@ -1,9 +1,9 @@
-import { appendInitialChild, createInstance, createTextInstance } from 'hostConfig';
+import { appendInitialChild, Container, createInstance, createTextInstance } from 'hostConfig';
 import { FiberNode } from './fiber';
 import { HostComponent, HostRoot, HostText } from './workTags';
 import { NoFlags } from './fiberFlags';
 
-const appendAllChildren = (parent: any, wip: FiberNode) => {
+const appendAllChildren = (parent: Container, wip: FiberNode) => {
 	let node = wip.child;
 	while (node !== null) {
 		if (node.tag === HostComponent || node.tag === HostText) {
@@ -59,12 +59,12 @@ export const completeWork = (wip: FiberNode) => {
 			} else {
 				// 初始渲染阶段
 				// 1. 创建DOM节点
-				const instance = createInstance(wip);
+				const instance = createInstance(wip.type, wip.memoizedProps);
 				// 2. 将DOM节点插入DOM树中
 				appendAllChildren(instance, wip);
 				// 3. 将DOM节点保存到Fiber节点中
 				wip.stateNode = instance;
-                bubbleProperties(wip);
+				bubbleProperties(wip);
 			}
 			return null;
 		case HostText:
@@ -75,7 +75,7 @@ export const completeWork = (wip: FiberNode) => {
 				const instance = createTextInstance(wip.pendingProps.content);
 				wip.stateNode = instance;
 			}
-            bubbleProperties(wip);
+			bubbleProperties(wip);
 			return null;
 		default:
 			if (__DEV__) {
