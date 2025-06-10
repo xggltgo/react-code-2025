@@ -19,7 +19,8 @@ export const createContainer = (container: Container) => {
 };
 
 /**
- * 该函数会在 ReactDOM.createRoot().render() 中调用，开启调度更新流程
+ * 添加<App />根组件作为更新至 hostRootFiber 的更新队列中，开启调度更新流程
+ * 该函数会在 ReactDOM.createRoot().render() 中调用
  */
 export const updateContainer = (element: ReactElementType, fiberRootNode: FiberRootNode) => {
     const hostRootFiber = fiberRootNode.current;

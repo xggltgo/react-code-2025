@@ -42,7 +42,7 @@ const bubbleProperties = (wip: FiberNode) => {
 	while (child !== null) {
 		subtreeFlags |= child.subtreeFlags;
 		subtreeFlags |= child.flags;
-		child.return = wip;
+		// child.return = wip; // DEL
 		child = child.sibling;
 	}
 	wip.subtreeFlags |= subtreeFlags;
@@ -58,11 +58,10 @@ export const completeWork = (wip: FiberNode) => {
 				// 更新阶段
 			} else {
 				// 初始渲染阶段
-				// 1. 创建DOM节点
+				// 1. 创建HostComponent对应的DOM节点
 				const instance = createInstance(wip.type, wip.memoizedProps);
-				// 2. 将DOM节点插入DOM树中
+				// 2. 将HostComponent的子节点的DOM节点插入到HostComponent的DOM节点中
 				appendAllChildren(instance, wip);
-				// 3. 将DOM节点保存到Fiber节点中
 				wip.stateNode = instance;
 				bubbleProperties(wip);
 			}

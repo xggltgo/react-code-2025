@@ -13,12 +13,14 @@ export default [
 			{
 				file: baseOutputPath + '/index.js',
 				name: 'index.js',
-				format: 'umd'
+				format: 'umd',
+				sourcemap: true
 			},
 			{
 				file: baseOutputPath + '/client.js',
 				name: 'client.js',
-				format: 'umd'
+				format: 'umd',
+				sourcemap: true
 			}
 		],
 		plugins: [

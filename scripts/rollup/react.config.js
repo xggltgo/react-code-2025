@@ -10,8 +10,9 @@ export default [
 		input: baseInputPath + '/' + packageJson.module,
 		output: {
 			file: baseOutputPath + '/index.js',
-			name: 'index.js',
-			format: 'umd'
+			name: 'react',
+			format: 'umd',
+			sourcemap: true
 		},
 		plugins: [
 			...initBasePlugin(),
@@ -32,12 +33,14 @@ export default [
 			{
 				file: baseOutputPath + '/jsx-dev-runtime.js',
 				name: 'jsx-dev-runtime.js',
-				format: 'umd'
+				format: 'umd',
+				sourcemap: true
 			},
 			{
 				file: baseOutputPath + '/jsx-runtime.js',
 				name: 'jsx-runtime.js',
-				format: 'umd'
+				format: 'umd',
+				sourcemap: true
 			}
 		],
 		plugins: [...initBasePlugin()]

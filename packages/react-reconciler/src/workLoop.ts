@@ -27,7 +27,7 @@ const completeUnitOfWork = (fiber: FiberNode) => {
 
 const performUnitOfWork = (fiber: FiberNode) => {
 	const next = beginWork(fiber);
-	fiber.memoizedProps = fiber.pendingProps;
+	// fiber.memoizedProps = fiber.pendingProps; // DEL
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {
@@ -84,7 +84,7 @@ export const renderRoot = (fiberRootNode: FiberRootNode) => {
 		}
 	} while (true);
 
-	// 得到了一颗带有flags的新的 fiber 树
+	// 得到了一颗带有flags的完整的wip fiberNode 树
 	const finishedWork = fiberRootNode.current.alternate;
 	fiberRootNode.finishedWork = finishedWork;
 
@@ -104,9 +104,12 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 	if (node.tag === HostRoot) {
 		return node.stateNode;
 	}
-	return null;
+	// return null; // DEL
 };
 
+/**
+ * 向上查找，直到找到 React 应用对应的 fiberRootNode 节点，开启更新流程
+ */
 export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
 	// TODO 调度更新
 	const fiberRootNode = markUpdateFromFiberToRoot(fiber);
