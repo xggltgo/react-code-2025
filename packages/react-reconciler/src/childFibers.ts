@@ -6,7 +6,7 @@ import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 
 const ChildReconciler = (shouldTrackEffects: boolean) => {
 	const placeSingleChild = (fiber: FiberNode) => {
-		if (shouldTrackEffects && fiber.alternate !== null) {
+		if (shouldTrackEffects && fiber.alternate === null) { // TODO: 需要听一下
 			fiber.flags |= Placement;
 		}
 		return fiber;

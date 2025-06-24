@@ -94,8 +94,8 @@ export const createFiberFromElement = (element: ReactElementType): FiberNode => 
 	let fiberTag: WorkTag = FunctionComponent;
 	if (typeof type === 'string') {
 		fiberTag = HostComponent;
-	} else if (typeof type === 'function' && __DEV__) {
-		console.log('invailid type', element);
+	} else if (typeof type !== 'function' && __DEV__) {
+		console.log('invalid type', element);
 	}
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;

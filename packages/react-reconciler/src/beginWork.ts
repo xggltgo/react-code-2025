@@ -1,8 +1,9 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFibers';
+import { renderWithHooks } from './fiberHooks';
 
 export const beginWork = (wip: FiberNode) => {
 	switch (wip.tag) {
@@ -12,6 +13,8 @@ export const beginWork = (wip: FiberNode) => {
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork: unhandled unit of work type', wip.tag);
@@ -48,5 +51,11 @@ const updateHostComponent = (wip: FiberNode) => {
 	// 无需计算新的状态，仅创建新的子节点
 	const childReactElement = wip.pendingProps.children;
 	reconcileChildren(wip, childReactElement);
+	return wip.child;
+};
+
+const updateFunctionComponent = (wip: FiberNode) => {
+	const nextChildren = renderWithHooks(wip);
+	reconcileChildren(wip, nextChildren);
 	return wip.child;
 };

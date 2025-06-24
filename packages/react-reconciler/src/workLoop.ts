@@ -47,7 +47,7 @@ const commitRoot = (fiberRootNode: FiberRootNode) => {
 		return;
 	}
 	if (__DEV__) {
-		console.log('commit阶段开始', finishedWork);
+		console.log('commit阶段开始,完整的且带有副作用的 wip fiberNode 树：', finishedWork);
 	}
 	fiberRootNode.finishedWork = null;
 

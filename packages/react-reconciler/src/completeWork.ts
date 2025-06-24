@@ -1,6 +1,6 @@
 import { appendInitialChild, Container, createInstance, createTextInstance } from 'hostConfig';
 import { FiberNode } from './fiber';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags';
 import { NoFlags } from './fiberFlags';
 
 const appendAllChildren = (parent: Container, wip: FiberNode) => {
@@ -74,6 +74,9 @@ export const completeWork = (wip: FiberNode) => {
 				const instance = createTextInstance(wip.pendingProps.content);
 				wip.stateNode = instance;
 			}
+			bubbleProperties(wip);
+			return null;
+		case FunctionComponent:
 			bubbleProperties(wip);
 			return null;
 		default:
