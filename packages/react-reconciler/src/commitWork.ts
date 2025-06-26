@@ -41,7 +41,7 @@ const appendPlacementNodeIntoContainer = (finishedWork: FiberNode, hostParent: C
 
 const commitPlacement = (finishedWork: FiberNode) => {
 	if (__DEV__) {
-		console.warn('执行Placement操作', finishedWork);
+		console.warn('执行Placement操作,当前处理的finishedWork节点：', finishedWork);
 	}
 	// 父级宿主环境对应的节点 DOM
 	const hostParent = getHostParent(finishedWork);

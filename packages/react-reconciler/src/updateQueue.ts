@@ -1,3 +1,4 @@
+import { Dispatch } from 'react/src/currentDispatcher';
 import { Action } from 'shared/ReactTypes';
 
 // 定义原子级别的更新的数据结构
@@ -10,6 +11,7 @@ export type UpdateQueue<State> = {
 	shared: {
 		pending: Update<State> | null;
 	};
+	dispatch: Dispatch<State> | null;
 };
 
 // 创建一个原子级别的更新
@@ -19,7 +21,7 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
 
 // 创建一个消费原子级别更新的队列？
 export const createUpdateQueue = <State>(): UpdateQueue<State> => {
-	return { shared: { pending: null } };
+	return { shared: { pending: null }, dispatch: null };
 };
 
 // 向更新队列中添加一个更新

@@ -42,6 +42,7 @@ export default [
 					}
 				})
 			})
-		]
+		],
+		external: [...Object.keys(packageJson.peerDependencies)]
 	}
 ];
