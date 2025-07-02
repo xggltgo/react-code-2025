@@ -1,7 +1,7 @@
 import { appendInitialChild, Container, createInstance, createTextInstance } from 'hostConfig';
 import { FiberNode } from './fiber';
 import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
 
 const appendAllChildren = (parent: Container, wip: FiberNode) => {
 	let node = wip.child;
@@ -48,6 +48,10 @@ const bubbleProperties = (wip: FiberNode) => {
 	wip.subtreeFlags |= subtreeFlags;
 };
 
+const markUpdate = (fiber: FiberNode) => {
+	fiber.flags |= Update; // 标记为更新
+};
+
 export const completeWork = (wip: FiberNode) => {
 	switch (wip.tag) {
 		case HostRoot:
@@ -69,6 +73,11 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (wip.alternate !== null && wip.stateNode) {
 				// 更新阶段
+				const oldText = wip.alternate.memoizedProps.content;
+				const newText = wip.pendingProps.content;
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
 				// 初始渲染阶段
 				const instance = createTextInstance(wip.pendingProps.content);
