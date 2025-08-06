@@ -68,16 +68,16 @@ export class FiberRootNode {
 }
 
 /**
- * 创建 hostRootFiber 对应的 wip FiberNode
+ * 创建 currentFiber 对应的 wip FiberNode
  */
-export const createWorkInProgress = (hostRootFiber: FiberNode, pendingProps: Props): FiberNode => {
-	let wip = hostRootFiber.alternate;
+export const createWorkInProgress = (currentFiber: FiberNode, pendingProps: Props): FiberNode => {
+	let wip = currentFiber.alternate;
 	if (wip === null) {
 		// mount
-		wip = new FiberNode(hostRootFiber.tag, pendingProps, hostRootFiber.key);
-		wip.alternate = hostRootFiber;
-		hostRootFiber.alternate = wip;
-		wip.stateNode = hostRootFiber.stateNode;
+		wip = new FiberNode(currentFiber.tag, pendingProps, currentFiber.key);
+		wip.alternate = currentFiber;
+		currentFiber.alternate = wip;
+		wip.stateNode = currentFiber.stateNode;
 	} else {
 		// update
 		wip.pendingProps = pendingProps;
@@ -85,10 +85,10 @@ export const createWorkInProgress = (hostRootFiber: FiberNode, pendingProps: Pro
 		wip.subtreeFlags = NoFlags;
 		wip.deletions = null;
 	}
-	wip.type = hostRootFiber.type;
-	wip.memoizedProps = hostRootFiber.memoizedProps;
-	wip.memoizedState = hostRootFiber.memoizedState;
-	wip.updateQueue = hostRootFiber.updateQueue;
+	wip.type = currentFiber.type;
+	wip.memoizedProps = currentFiber.memoizedProps;
+	wip.memoizedState = currentFiber.memoizedState;
+	wip.updateQueue = currentFiber.updateQueue;
 
 	return wip;
 };

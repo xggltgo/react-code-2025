@@ -2,6 +2,7 @@ import { appendInitialChild, Container, createInstance, createTextInstance } fro
 import { FiberNode } from './fiber';
 import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags';
 import { NoFlags, Update } from './fiberFlags';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
 const appendAllChildren = (parent: Container, wip: FiberNode) => {
 	let node = wip.child;
@@ -60,6 +61,7 @@ export const completeWork = (wip: FiberNode) => {
 		case HostComponent:
 			if (wip.alternate !== null && wip.stateNode) {
 				// 更新阶段
+				updateFiberProps(wip.stateNode, wip.memoizedProps);
 			} else {
 				// 初始渲染阶段
 				// 1. 创建HostComponent对应的DOM节点
@@ -67,8 +69,8 @@ export const completeWork = (wip: FiberNode) => {
 				// 2. 将HostComponent的子节点的DOM节点插入到HostComponent的DOM节点中
 				appendAllChildren(instance, wip);
 				wip.stateNode = instance;
-				bubbleProperties(wip);
 			}
+			bubbleProperties(wip);
 			return null;
 		case HostText:
 			if (wip.alternate !== null && wip.stateNode) {

@@ -22,6 +22,9 @@ let currentlyRenderingFiber: FiberNode | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
 
+/**
+ * 创建hook，并建立hook之间的连接，形成hook链表（保存至当前FC fiberNode 的 memoizedState 属性中 ），返回创建的hook
+ */
 const mountWorkInProgressHook = (): Hook => {
 	const hook: Hook = {
 		memoizedState: null,
@@ -80,9 +83,13 @@ const updateWorkInProgressHook = (): Hook => {
 		}
 	} else {
 		// mount 的后续 Hook
-		workInProgressHook.next = newHook;
+		// workInProgressHook.next = newHook; DEL:看不懂，好像没用
 		workInProgressHook = newHook;
+		if (currentlyRenderingFiber) {
+			currentlyRenderingFiber.memoizedState = workInProgressHook;
+		}
 	}
+	return workInProgressHook;
 };
 
 const dispatchSetState = <State>(
@@ -106,7 +113,6 @@ const mountState = <State>(initialState: State | (() => State)): [State, Dispatc
 	const queue = createUpdateQueue<State>();
 	hook.updateQueue = queue;
 	hook.memoizedState = memoizedState;
-
 	// @ts-ignore
 	const dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue);
 	queue.dispatch = dispatch;
@@ -154,7 +160,7 @@ export const renderWithHooks = (wip: FiberNode) => {
 	const children = Component(props);
 
 	currentlyRenderingFiber = null;
-	workInProgressHook = null;
+	// workInProgressHook = null;  // TODO：这里可能不能重置，重置后我感觉会导致hook链表丢失
 	currentHook = null;
 
 	return children;

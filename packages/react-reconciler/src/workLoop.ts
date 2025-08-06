@@ -27,7 +27,7 @@ const completeUnitOfWork = (fiber: FiberNode) => {
 
 const performUnitOfWork = (fiber: FiberNode) => {
 	const next = beginWork(fiber);
-	// fiber.memoizedProps = fiber.pendingProps; // DEL
+	fiber.memoizedProps = fiber.pendingProps; // DEL
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {
