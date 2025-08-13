@@ -1,6 +1,6 @@
-export { jsxDEV, Fragment } from './src/jsx';
+export { jsx, Fragment } from './src/jsx';
 
-// TypeScript typing for the new JSX transform in dev
+// TypeScript typing for the new JSX transform in prod
 // Ensures JSX expressions are typed as our internal ReactElementType
 import type { ReactElementType } from 'shared/ReactTypes';
 

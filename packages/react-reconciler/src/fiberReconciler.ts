@@ -4,6 +4,7 @@ import { HostRoot } from './workTags';
 import { createUpdate, createUpdateQueue, enqueueUpdate, UpdateQueue } from './updateQueue';
 import { ReactElementType } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
+import { requestUpdateLane } from './fiberLanes';
 
 // ReactDOM.createRoot(document.getElementById('root')).render(<App />)
 
@@ -23,9 +24,10 @@ export const createContainer = (container: Container) => {
  * 该函数会在 ReactDOM.createRoot().render() 中调用
  */
 export const updateContainer = (element: ReactElementType, fiberRootNode: FiberRootNode) => {
-    const hostRootFiber = fiberRootNode.current;
-    const update = createUpdate<ReactElementType | null>(element);
-    enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>, update); // 将更新添加到 hostRootFiber 的更新队列中
-    scheduleUpdateOnFiber(hostRootFiber); // 调度更新
-    return element;
+	const hostRootFiber = fiberRootNode.current;
+	const lane = requestUpdateLane(); // 获取当前更新优先级
+	const update = createUpdate<ReactElementType | null>(element, lane);
+	enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>, update); // 将更新添加到 hostRootFiber 的更新队列中
+	scheduleUpdateOnFiber(hostRootFiber, lane); // 调度更新
+	return element;
 };

@@ -4,11 +4,23 @@ import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
 import { MutationMask, NoFlags } from './fiberFlags';
 import { HostRoot } from './workTags';
+import {
+	getHighestPriorityLane,
+	Lane,
+	markRootFinished,
+	mergeLanes,
+	NoLane,
+	SyncLane
+} from './fiberLanes';
+import { flushSyncCallbacks, scheduleSyncCallback } from './syncTaskQueue';
+import { scheduleMicroTask } from 'hostConfig';
 
 let workInProgress: FiberNode | null = null;
+let wipRootRenderLane: Lane = NoLane;
 
-const prepareFreshStack = (fiberRootNode: FiberRootNode) => {
+const prepareFreshStack = (fiberRootNode: FiberRootNode, lane: Lane) => {
 	workInProgress = createWorkInProgress(fiberRootNode.current, {});
+	wipRootRenderLane = lane;
 };
 
 const completeUnitOfWork = (fiber: FiberNode) => {
@@ -26,7 +38,7 @@ const completeUnitOfWork = (fiber: FiberNode) => {
 };
 
 const performUnitOfWork = (fiber: FiberNode) => {
-	const next = beginWork(fiber);
+	const next = beginWork(fiber, wipRootRenderLane);
 	fiber.memoizedProps = fiber.pendingProps; // DEL
 	if (next === null) {
 		completeUnitOfWork(fiber);
@@ -69,28 +81,6 @@ const commitRoot = (fiberRootNode: FiberRootNode) => {
 	}
 };
 
-export const renderRoot = (fiberRootNode: FiberRootNode) => {
-	// 初始化
-	prepareFreshStack(fiberRootNode);
-
-	do {
-		try {
-			workLoop();
-			break;
-		} catch (error) {
-			if (__DEV__) {
-				console.error('workLoop error', error);
-			}
-		}
-	} while (true);
-
-	// 得到了一颗带有flags的完整的wip fiberNode 树
-	const finishedWork = fiberRootNode.current.alternate;
-	fiberRootNode.finishedWork = finishedWork;
-
-	commitRoot(fiberRootNode);
-};
-
 /**
  * 根据当前 fiber 节点，向上查找，直到找到 React 应用对应的 fiberRootNode 节点
  * @param fiber
@@ -107,11 +97,73 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 	// return null; // DEL
 };
 
+const markRootUpdated = (root: FiberRootNode, lane: Lane) => {
+	root.pendingLanes = mergeLanes(root.pendingLanes, lane);
+};
+
+const performSyncWorkOnRoot = (fiberRootNode: FiberRootNode, lane: Lane) => {
+	const nextLane = getHighestPriorityLane(fiberRootNode.pendingLanes);
+	if (nextLane !== SyncLane) {
+		// 调度其他比SyncLane优先级更低的工作
+		ensureRootIsScheduled(fiberRootNode);
+		return;
+	}
+	if (__DEV__) {
+		console.log('render阶段开始');
+	}
+	prepareFreshStack(fiberRootNode, lane);
+
+	do {
+		try {
+			workLoop();
+			break;
+		} catch (error) {
+			if (__DEV__) {
+				console.error('workLoop error', error);
+			}
+		}
+	} while (true);
+
+	const finishedWork = fiberRootNode.current.alternate;
+	fiberRootNode.finishedWork = finishedWork;
+	fiberRootNode.finishedLane = lane;
+	wipRootRenderLane = NoLane;
+
+	commitRoot(fiberRootNode);
+
+	const _lane = fiberRootNode.finishedLane;
+	if (_lane === NoLane && __DEV__) {
+		console.warn('lane 不应该为 NoLane');
+	}
+	fiberRootNode.finishedWork = null;
+	fiberRootNode.finishedLane = NoLane;
+	markRootFinished(fiberRootNode, _lane);
+};
+
+const ensureRootIsScheduled = (fiberRootNode: FiberRootNode) => {
+	const updateLane = getHighestPriorityLane(fiberRootNode.pendingLanes);
+	if (updateLane === NoLane) {
+		return;
+	}
+	if (updateLane === SyncLane) {
+		if (__DEV__) {
+			console.log('微任务调度同步更新');
+		}
+		scheduleSyncCallback(performSyncWorkOnRoot.bind(null, fiberRootNode, updateLane));
+		scheduleMicroTask(flushSyncCallbacks);
+	} else {
+		if (__DEV__) {
+			console.log('宏任务调度异步更新');
+		}
+	}
+};
+
 /**
  * 向上查找，直到找到 React 应用对应的 fiberRootNode 节点，开启更新流程
  */
-export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
+export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
 	// TODO 调度更新
 	const fiberRootNode = markUpdateFromFiberToRoot(fiber);
-	renderRoot(fiberRootNode);
+	markRootUpdated(fiberRootNode, lane);
+	ensureRootIsScheduled(fiberRootNode);
 };

@@ -19,6 +19,8 @@
 		"baseUrl": "./packages",
 		"paths": {
 			"hostConfig": ["./react-dom/src/hostConfig.ts"],
-		}
+		},
+		"jsx": "react-jsx",
+		"jsxImportSource": "react"
 	}
 }

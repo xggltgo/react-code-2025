@@ -10,6 +10,7 @@ import {
 } from './updateQueue';
 import { Action } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
+import { Lane, NoLane, requestUpdateLane } from './fiberLanes';
 
 interface Hook {
 	memoizedState: any; // 存储当前 HooK 的状态
@@ -21,6 +22,7 @@ const { currentDispatcher } = internals;
 let currentlyRenderingFiber: FiberNode | null = null;
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
+let renderLane: Lane = NoLane;
 
 /**
  * 创建hook，并建立hook之间的连接，形成hook链表（保存至当前FC fiberNode 的 memoizedState 属性中 ），返回创建的hook
@@ -97,9 +99,10 @@ const dispatchSetState = <State>(
 	updateQueue: UpdateQueue<State>,
 	action: Action<State>
 ) => {
-	const update = createUpdate(action);
+	const lane = requestUpdateLane();
+	const update = createUpdate(action, lane);
 	enqueueUpdate(updateQueue, update);
-	scheduleUpdateOnFiber(fiber);
+	scheduleUpdateOnFiber(fiber, lane);
 };
 
 const mountState = <State>(initialState: State | (() => State)): [State, Dispatch<State>] => {
@@ -125,7 +128,7 @@ const updateState = <State>(): [State, Dispatch<State>] => {
 	const queue = hook.updateQueue as UpdateQueue<State>;
 	const pending = queue.shared.pending;
 	if (pending !== null) {
-		const { memoizedState } = processUpdateQueue(hook.memoizedState, pending);
+		const { memoizedState } = processUpdateQueue(hook.memoizedState, pending, renderLane);
 		hook.memoizedState = memoizedState;
 	}
 	return [hook.memoizedState, queue.dispatch as Dispatch<State>];
@@ -142,9 +145,10 @@ const HooksDispatcherOnUpdate: Dispatcher = {
 /**
  *
  */
-export const renderWithHooks = (wip: FiberNode) => {
+export const renderWithHooks = (wip: FiberNode, lane: Lane) => {
 	currentlyRenderingFiber = wip; // 记录当前正在处理的 FunctionComponent FiberNode
 	wip.memoizedState = null; // TODO：这是干嘛用的,重置hooks链表？
+	renderLane = lane;
 	const current = wip.alternate;
 
 	if (current !== null) {
@@ -162,6 +166,7 @@ export const renderWithHooks = (wip: FiberNode) => {
 	currentlyRenderingFiber = null;
 	// workInProgressHook = null;  // TODO：这里可能不能重置，重置后我感觉会导致hook链表丢失
 	currentHook = null;
+	renderLane = NoLane;
 
 	return children;
 };
