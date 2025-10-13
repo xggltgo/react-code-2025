@@ -1,6 +1,9 @@
 let syncQueue: ((...args: any) => void)[] | null = null;
 let isFlushingSyncQueue = false;
 
+/**
+ * 将回调函数添加到同步队列中
+ */
 export function scheduleSyncCallback(callback: (...args: any) => void) {
 	if (syncQueue === null) {
 		syncQueue = [callback];
@@ -9,6 +12,9 @@ export function scheduleSyncCallback(callback: (...args: any) => void) {
 	}
 }
 
+/**
+ * 执行同步队列中的回调函数
+ */
 export function flushSyncCallbacks() {
 	if (!isFlushingSyncQueue && syncQueue) {
 		isFlushingSyncQueue = true;

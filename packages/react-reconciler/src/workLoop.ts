@@ -16,8 +16,11 @@ import { flushSyncCallbacks, scheduleSyncCallback } from './syncTaskQueue';
 import { scheduleMicroTask } from 'hostConfig';
 
 let workInProgress: FiberNode | null = null;
-let wipRootRenderLane: Lane = NoLane;
+let wipRootRenderLane: Lane = NoLane; // 当前的更新流程的优先级
 
+/**
+ * 创建 hostRootFiber 对应的 workInProgress 节点，并设置两者之间的关系（alternate互相指向），同时设置 wipRootRenderLane
+ */
 const prepareFreshStack = (fiberRootNode: FiberRootNode, lane: Lane) => {
 	workInProgress = createWorkInProgress(fiberRootNode.current, {});
 	wipRootRenderLane = lane;
@@ -41,6 +44,7 @@ const performUnitOfWork = (fiber: FiberNode) => {
 	const next = beginWork(fiber, wipRootRenderLane);
 	fiber.memoizedProps = fiber.pendingProps; // DEL
 	if (next === null) {
+		// 进入到这里，说明递阶段完成，生成了一颗完整的wip fiberNode树，接下来开启归的流程
 		completeUnitOfWork(fiber);
 	} else {
 		workInProgress = next;
@@ -61,7 +65,6 @@ const commitRoot = (fiberRootNode: FiberRootNode) => {
 	if (__DEV__) {
 		console.log('commit阶段开始,完整的且带有副作用的 wip fiberNode 树：', finishedWork);
 	}
-	fiberRootNode.finishedWork = null;
 
 	// 判断是否存在三个子阶段 beforeMutation, mutation, layout 需要执行的操作
 	// fiberRootNode flags 和 fiberRootNode subtreeFlags
@@ -97,10 +100,16 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 	// return null; // DEL
 };
 
+/**
+ * 将当前 fiber 节点的 lane 合并到 fiberRootNode 的 pendingLanes 中
+ */
 const markRootUpdated = (root: FiberRootNode, lane: Lane) => {
 	root.pendingLanes = mergeLanes(root.pendingLanes, lane);
 };
 
+/**
+ * 开启同步更新，正式开启更新流程
+ */
 const performSyncWorkOnRoot = (fiberRootNode: FiberRootNode, lane: Lane) => {
 	const nextLane = getHighestPriorityLane(fiberRootNode.pendingLanes);
 	if (nextLane !== SyncLane) {
@@ -149,7 +158,9 @@ const ensureRootIsScheduled = (fiberRootNode: FiberRootNode) => {
 		if (__DEV__) {
 			console.log('微任务调度同步更新');
 		}
+		// 将真实开启更新流程的函数加入到同步任务队列中
 		scheduleSyncCallback(performSyncWorkOnRoot.bind(null, fiberRootNode, updateLane));
+		// 遍历执行同步任务队列，且放置到微任务中执行
 		scheduleMicroTask(flushSyncCallbacks);
 	} else {
 		if (__DEV__) {
@@ -162,7 +173,6 @@ const ensureRootIsScheduled = (fiberRootNode: FiberRootNode) => {
  * 向上查找，直到找到 React 应用对应的 fiberRootNode 节点，开启更新流程
  */
 export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
-	// TODO 调度更新
 	const fiberRootNode = markUpdateFromFiberToRoot(fiber);
 	markRootUpdated(fiberRootNode, lane);
 	ensureRootIsScheduled(fiberRootNode);

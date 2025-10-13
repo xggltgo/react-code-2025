@@ -4,6 +4,11 @@ import { Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from '
 import { NoFlags, Update } from './fiberFlags';
 import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
+/**
+ * 将当前wip node节点的子 wip node节点的宿主环境节点（真实DOM）插入到当前wip node节点对应的宿主环境节点（真实DOM）
+ * @param parent 当前wip node节点对应的宿主环境节点（真实DOM）
+ * @param wip 当前wip node节点
+ */
 const appendAllChildren = (parent: Container, wip: FiberNode) => {
 	let node = wip.child;
 	while (node !== null) {

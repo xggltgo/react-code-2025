@@ -174,28 +174,31 @@ const commitDeletion = (childToDelete: FiberNode) => {
 	childToDelete.child = null;
 };
 
-const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
-	const flags = finishedWork.flags;
+const commitMutationEffectsOnFiber = (fiberNode: FiberNode) => {
+	const flags = fiberNode.flags;
 	if ((flags & Placement) !== NoFlags) {
-		commitPlacement(finishedWork);
-		finishedWork.flags &= ~Placement;
+		commitPlacement(fiberNode);
+		fiberNode.flags &= ~Placement;
 	}
 	if ((flags & Update) !== NoFlags) {
-		commitUpdate(finishedWork);
-		finishedWork.flags &= ~Update;
+		commitUpdate(fiberNode);
+		fiberNode.flags &= ~Update;
 	}
 	if ((flags & ChildDeletion) !== NoFlags) {
-		const deletions = finishedWork.deletions;
+		const deletions = fiberNode.deletions;
 		if (deletions !== null) {
 			deletions.forEach((oldFiber) => {
 				commitDeletion(oldFiber);
 			});
 		}
-		finishedWork.flags &= ~ChildDeletion;
+		fiberNode.flags &= ~ChildDeletion;
 	}
 	// 其他 flags 的处理
 };
 
+/**
+ * 在完成递和归阶段的wip node树中找到第一个带有副作用Effect的节点，进行副作用处理操作
+ */
 export const commitMutationEffects = (finishedWork: FiberNode) => {
 	nextEffect = finishedWork;
 	while (nextEffect !== null) {

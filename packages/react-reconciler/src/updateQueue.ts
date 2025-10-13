@@ -43,7 +43,9 @@ export const enqueueUpdate = <State>(updateQueue: UpdateQueue<State>, update: Up
 	updateQueue.shared.pending = update;
 };
 
-// 处理更新队列
+/**
+ * 根据当前状态和待处理的更新，生成新的状态
+ */
 export const processUpdateQueue = <State>(
 	baseState: State,
 	pendingUpdate: Update<State> | null,

@@ -15,6 +15,7 @@ export function requestUpdateLane() {
 	return SyncLane;
 }
 
+// 拿到最高优先级的更新（如何理解下述二进制处理？）
 export function getHighestPriorityLane(lanes: Lanes): Lane {
 	return lanes & -lanes;
 }

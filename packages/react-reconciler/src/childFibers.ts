@@ -51,6 +51,10 @@ const ChildReconciler = (shouldTrackEffects: boolean) => {
 		}
 	};
 
+	/**
+	 * 根据当前 wip FiberNode 对应的 子 current FIberNode  和子 ReactElement 创建子 wip FIberNode，
+	 * 并与其父 wip FiberNode 建立联系，最后返回新创建的子 wip FiberNode
+	 */
 	const reconcileSingleElement = (
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
@@ -218,7 +222,7 @@ const ChildReconciler = (shouldTrackEffects: boolean) => {
 				firstNewFiber = newFiber;
 			} else {
 				lastNewFiber.sibling = newFiber;
-				lastNewFiber = lastNewFiber.sibling;
+				lastNewFiber = newFiber;
 			}
 
 			if (!shouldTrackEffects) {

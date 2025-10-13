@@ -58,6 +58,9 @@ export const insertChildToContainer = (child: Instance, container: Container, be
 	container.insertBefore(child, before);
 };
 
+/**
+ * 调度微任务
+ */
 export const scheduleMicroTask =
 	typeof queueMicrotask === 'function'
 		? queueMicrotask

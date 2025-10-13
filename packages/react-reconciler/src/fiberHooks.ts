@@ -143,7 +143,8 @@ const HooksDispatcherOnUpdate: Dispatcher = {
 };
 
 /**
- *
+ * 运行函数组件，拿到其返回的React Element.
+ * 过程中，确定hook运行的环境（mount or update）.
  */
 export const renderWithHooks = (wip: FiberNode, lane: Lane) => {
 	currentlyRenderingFiber = wip; // 记录当前正在处理的 FunctionComponent FiberNode
