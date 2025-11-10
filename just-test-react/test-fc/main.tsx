@@ -2,11 +2,16 @@ import ReactDOM from 'react-dom/client';
 import { useState } from 'react';
 
 function App() {
-	const [v, setV] = useState(true);
+	const [num, setNum] = useState(0);
+	const handleClick = () => {
+		setNum(num => num + 1);
+		setNum(num => num + 1);
+		setNum(num => num + 1);
+	};
 	return (
 		<div>
-			{v ? <h1>This is a h1</h1> : <h3>This is a h3</h3>}
-			<button onClick={() => setV(!v)}>button</button>
+			<div>{num}</div>
+			<button onClickCapture={handleClick}>add</button>
 		</div>
 	);
 }

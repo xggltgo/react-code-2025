@@ -165,7 +165,7 @@ export const renderWithHooks = (wip: FiberNode, lane: Lane) => {
 	const children = Component(props);
 
 	currentlyRenderingFiber = null;
-	// workInProgressHook = null;  // TODO：这里可能不能重置，重置后我感觉会导致hook链表丢失
+	workInProgressHook = null;  // TODO：这里可能不能重置，重置后我感觉会导致hook链表丢失
 	currentHook = null;
 	renderLane = NoLane;
 
